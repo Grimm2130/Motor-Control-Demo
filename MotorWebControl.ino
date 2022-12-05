@@ -2,7 +2,9 @@
 #include <WiFi.h>
 
 // Define motor Control pins
-int motorPins[3] = {0,12,39};
+// EN F B
+int motor_1Pins[3] = {0,12,17};
+int motor_2Pins[3] = {0,21,23};
 
 // Replace with your network credentials
 const char* ssid     = "ESP32-Motor-Control";
@@ -20,41 +22,47 @@ String MotorState = "off";
 //-----------Global functions-------------
 // Turns motor on
 void motorForward(){
-  // Enable the chip
-  digitalWrite(motorPins[0], HIGH);
   // Configure to move forward
-  digitalWrite(motorPins[1], LOW);
-  digitalWrite(motorPins[2], HIGH);
+  digitalWrite(motor_1Pins[1], LOW);
+  digitalWrite(motor_1Pins[2], HIGH);
+  digitalWrite(motor_2Pins[1], LOW);
+  digitalWrite(motor_2Pins[2], HIGH);
 }
 
 void motorBackwards(){
-  // Enable the chip
-  digitalWrite(motorPins[0], HIGH);
   // Configure to move forward
-  digitalWrite(motorPins[1], HIGH);
-  digitalWrite(motorPins[2], LOW);
+  digitalWrite(motor_1Pins[1], HIGH);
+  digitalWrite(motor_1Pins[2], LOW);
+  digitalWrite(motor_2Pins[1], HIGH);
+  digitalWrite(motor_2Pins[2], LOW);
 }
 
 // Turns motor off
 void motorOff(){
   // disable the chip
-  digitalWrite(motorPins[0], LOW);
+  digitalWrite(motor_1Pins[0], LOW);
 }
 
 // Turns motor On
 void motorOn(){
   // disable the chip
-  digitalWrite(motorPins[0], HIGH);
+  digitalWrite(motor_1Pins[0], 150);
 }
 
 // Turn left
 void motorLeft(){
-  // #TODO
+  digitalWrite(motor_1Pins[1], HIGH);
+  digitalWrite(motor_1Pins[2], LOW);
+  digitalWrite(motor_2Pins[1], LOW);
+  digitalWrite(motor_2Pins[2], HIGH);
 }
 
 // Turn right
 void motorRight(){
-  // # TODO
+  digitalWrite(motor_1Pins[1], LOW);
+  digitalWrite(motor_1Pins[2], HIGH);
+  digitalWrite(motor_2Pins[1], HIGH);
+  digitalWrite(motor_2Pins[2], LOW);
 }
 
 void setup() {
@@ -71,13 +79,19 @@ void setup() {
   server.begin();
   // Initialize the output variables as outputs
   for(int i = 0; i < 3; i++){
-    pinMode(motorPins[i], OUTPUT);  
+    pinMode(motor_1Pins[i], OUTPUT);  
+  }
+  for(int i = 0; i < 3; i++){
+    pinMode(motor_2Pins[i], OUTPUT);  
   }
   // Initialize the built-in led as an output
   pinMode(LED_BUILTIN, OUTPUT);
   // Set outputs to LOW
   for(int i = 0; i < 3; i++){
-    digitalWrite(motorPins[i], LOW);  
+    digitalWrite(motor_1Pins[i], LOW);  
+  }
+  for(int i = 0; i < 3; i++){
+    digitalWrite(motor_2Pins[i], LOW);  
   }
 }
 
@@ -172,15 +186,15 @@ void loop(){
             client.println(".left-Container {background-color: #FFFFFF; border: none; color: white; padding: 16px 40px;");
             client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;  position: absolute;");
             client.println("top: 300px;right: 350px}");
-            
+            client.println("</style></head>");
             // Web Page Heading
             client.println("<body><h1>ESP32 Motor Controller Server</h1>");
             
             // Display current state, and ON/OFF buttons for GPIO 26  
-            client.println("<p>Motor" + MotorState + "</p>");
+            client.println("<p>Motor " + MotorState + "</p>");
             // If the MotorState is off, it displays the ON button       
             if (MotorState=="off") {
-              client.println("<p><a href=\"/motor/on\"><button class=\"button\">ON</button></a></p>");
+              client.println("<p><a href=\"/motor/on\"><button class=\"button\">ON</button></a></p></body>");
             } 
             // Only if the motor state is on display the following
             else {
@@ -200,7 +214,7 @@ void loop(){
               client.println(" </div>");
               // Move right button
               client.println("<div class = \"left-Container\">");
-              client.println("<p><a href=\"/motor/right\"><button class=\"button3\">----></button></a></p>");
+              client.println("<p><a href=\"/motor/right\"><button class=\"button3\">----></button></a></p></body>");
               client.println("</div>");
             }
              
